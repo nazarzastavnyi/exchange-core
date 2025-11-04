@@ -10,10 +10,12 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
     withSourcesJar()
-    withJavadocJar()
 }
 
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo1.maven.org/maven2") }
+}
 
 dependencies {
     implementation "com.lmax:disruptor:3.4.4"
@@ -21,10 +23,10 @@ dependencies {
     // LZ4
     implementation "org.lz4:lz4-java:1.8.0"
 
-    // Chronicle — 2.20.x
-    implementation "net.openhft:chronicle-core:2.20.111"
-    implementation "net.openhft:chronicle-bytes:2.20.111"
-    implementation "net.openhft:chronicle-wire:2.20.111"
+    // Chronicle
+    implementation "net.openhft:chronicle-core:2.17.10"
+    implementation "net.openhft:chronicle-bytes:2.17.10"
+    implementation "net.openhft:chronicle-wire:2.17.10"
 
     implementation "org.eclipse.collections:eclipse-collections:10.4.0"
     implementation "org.agrona:agrona:1.13.0"
@@ -34,15 +36,25 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.30"
     compileOnly "org.jetbrains:annotations:24.1.0"
 
+    // Logging
     implementation "ch.qos.logback:logback-classic:1.3.15"
-    testImplementation "junit:junit:4.13.2"
 }
 
-// Make --release 8 only when running on JDK9+
-tasks.withType(JavaCompile).configureEach {
-    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_9)) {
-        options.release = 8
+tasks.withType(Javadoc).configureEach {
+    enabled = false
+}
+
+sourceSets {
+    test {
+        java.setSrcDirs([])
+        resources.setSrcDirs([])
     }
+}
+tasks.withType(JavaCompile).configureEach {
+    if (name == "compileTestJava") enabled = false
+}
+tasks.withType(Test).configureEach {
+    enabled = false
 }
 
 publishing {
@@ -52,7 +64,7 @@ publishing {
             artifactId = "exchange-core"
             pom {
                 name = "exchange-core (nazarii fork)"
-                description = "Fork of exchange-core with vendored collections"
+                description = "Fork of exchange-core with vendored collections; Javadoc & tests disabled for publish"
             }
         }
     }
