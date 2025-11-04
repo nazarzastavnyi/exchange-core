@@ -13,33 +13,28 @@ java {
     withJavadocJar()
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
-    // === CORE LIBS ===
-    implementation "com.lmax:disruptor:3.4.4"                 // RingBuffer, EventTranslatorOneArg
+    implementation "com.lmax:disruptor:3.4.4"
 
-    // Lombok
-    compileOnly "org.projectlombok:lombok:1.18.30"
-    annotationProcessor "org.projectlombok:lombok:1.18.30"
+    // LZ4
+    implementation "org.lz4:lz4-java:1.8.0"
 
-    // JetBrains annotations (@NotNull, etc.)
-    compileOnly "org.jetbrains:annotations:24.1.0"
-
-    // LZ4 + Chronicle stack
-    implementation "net.jpountz.lz4:lz4:1.3.0"
-    implementation "net.openhft:chronicle-core:2.27ea7"
-    implementation "net.openhft:chronicle-bytes:2.27ea7"
-    implementation "net.openhft:chronicle-wire:2.27ea7"
+    // Chronicle — 2.20.x
+    implementation "net.openhft:chronicle-core:2.20.111"
+    implementation "net.openhft:chronicle-bytes:2.20.111"
+    implementation "net.openhft:chronicle-wire:2.20.111"
 
     implementation "org.eclipse.collections:eclipse-collections:10.4.0"
     implementation "org.agrona:agrona:1.13.0"
 
-    // logging
-    implementation "ch.qos.logback:logback-classic:1.3.15"
+    // Lombok + JetBrains annotations
+    compileOnly "org.projectlombok:lombok:1.18.30"
+    annotationProcessor "org.projectlombok:lombok:1.18.30"
+    compileOnly "org.jetbrains:annotations:24.1.0"
 
+    implementation "ch.qos.logback:logback-classic:1.3.15"
     testImplementation "junit:junit:4.13.2"
 }
 
@@ -57,7 +52,7 @@ publishing {
             artifactId = "exchange-core"
             pom {
                 name = "exchange-core (nazarii fork)"
-                description = "Fork of exchange-core with vendored collections and CI publish"
+                description = "Fork of exchange-core with vendored collections"
             }
         }
     }
