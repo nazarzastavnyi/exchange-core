@@ -46,6 +46,7 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.nio.Buffer;
 
 
 @Slf4j
@@ -659,7 +660,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
         if (journalWriteBuffer.position() < journalBatchCompressThreshold) {
             // uncompressed write for single messages or small batches
             writtenBytes += journalWriteBuffer.position();
-            journalWriteBuffer.flip();
+            ((Buffer) journalWriteBuffer).flip();
 //            long t = System.nanoTime();
             channel.write(journalWriteBuffer);
 //            hdrRecorderRaw.recordValue(System.nanoTime() - t);
@@ -669,7 +670,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             // compressed write for bigger batches
 //            long t = System.nanoTime();
             int originalLength = journalWriteBuffer.position(); // commands code
-            journalWriteBuffer.flip();
+            ((Buffer) journalWriteBuffer).flip();
             lz4WriteBuffer.put(OrderCommandType.RESERVED_COMPRESSED.getCode()); // compressed block
             lz4WriteBuffer.putInt(0); // reserve space
             lz4WriteBuffer.putInt(0); // reserve space
@@ -679,7 +680,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             int remainingCompressedLength = lz4WriteBuffer.position() - 9; // 1 + 4 + 4
             lz4WriteBuffer.putInt(1, remainingCompressedLength); // 1 byte offset
             lz4WriteBuffer.putInt(5, originalLength); // 1 + 4 bytes offset
-            lz4WriteBuffer.flip();
+            ((Buffer) lz4WriteBuffer).flip();
 //            hdrRecorderLz4.recordValue(System.nanoTime() - t);
             channel.write(lz4WriteBuffer);
             lz4WriteBuffer.clear();
