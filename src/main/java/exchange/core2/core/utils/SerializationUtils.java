@@ -40,6 +40,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.nio.Buffer;
+
 
 @Slf4j
 public final class SerializationUtils {
@@ -63,13 +65,13 @@ public final class SerializationUtils {
 
         bytes.read(byteBuffer);
 
-        byteBuffer.flip();
+        ((Buffer) byteBuffer).flip();
 
         final ByteBuffer byteBufferCompressed = ByteBuffer.allocate(4 + lz4Compressor.maxCompressedLength(originalSize));
         byteBufferCompressed.putInt(originalSize);// override with compressed length
         lz4Compressor.compress(byteBuffer, byteBufferCompressed);
 
-        byteBufferCompressed.flip();
+        ((Buffer) byteBufferCompressed).flip();
 
         int compressedBytesLen = byteBufferCompressed.remaining();
 
