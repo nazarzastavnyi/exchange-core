@@ -1,0 +1,81 @@
+plugins {
+    id "java"
+    id "maven-publish"
+}
+
+group = "com.nazarii.exchange"
+version = "0.5.4-20251104"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo1.maven.org/maven2") }
+}
+
+dependencies {
+    implementation "com.lmax:disruptor:3.4.4"
+
+    // LZ4
+    implementation "org.lz4:lz4-java:1.8.0"
+
+    // Chronicle
+    implementation "net.openhft:chronicle-core:2.17.10"
+    implementation "net.openhft:chronicle-bytes:2.17.10"
+    implementation "net.openhft:chronicle-wire:2.17.10"
+
+    implementation "org.eclipse.collections:eclipse-collections:10.4.0"
+    implementation "org.agrona:agrona:1.13.0"
+
+    // Lombok + JetBrains annotations
+    compileOnly "org.projectlombok:lombok:1.18.30"
+    annotationProcessor "org.projectlombok:lombok:1.18.30"
+    compileOnly "org.jetbrains:annotations:24.1.0"
+
+    // Logging
+    implementation "ch.qos.logback:logback-classic:1.3.15"
+}
+
+tasks.withType(Javadoc).configureEach {
+    enabled = false
+}
+
+sourceSets {
+    test {
+        java.setSrcDirs([])
+        resources.setSrcDirs([])
+    }
+}
+tasks.withType(JavaCompile).configureEach {
+    if (name == "compileTestJava") enabled = false
+}
+tasks.withType(Test).configureEach {
+    enabled = false
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = "exchange-core"
+            pom {
+                name = "exchange-core (nazarii fork)"
+                description = "Fork of exchange-core with vendored collections; Javadoc & tests disabled for publish"
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/nazarzastavnyi/exchange-core")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user")
+                password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
+            }
+        }
+    }
+}
