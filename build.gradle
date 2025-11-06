@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+    implementation "exchange.core2:collections:0.5.1"
+
     implementation "com.lmax:disruptor:3.4.4"
 
     // LZ4
