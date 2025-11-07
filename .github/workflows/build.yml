@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "8"
+          cache: maven
+
+      - run: mvn -B clean deploy -P github-dashdevs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
