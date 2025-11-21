@@ -249,7 +249,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             log.info("Enabled journaling at seq = {} ({}+{})", enableJournalAfterSeq + 1, baseSeq, dSeq);
         }
 
-        boolean debug = false;
+        boolean debug = true;
 
 //        log.debug("Writing {}", cmd);
 
@@ -453,14 +453,14 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
         while (jr.available() != 0) {
 
-            boolean debug = false;
+            boolean debug = true;
 //            boolean debug = insideCompressedBlock;
 
             final byte cmd = jr.readByte();
 
             if (debug) log.debug("COMPR STEP lastSeq={} ", lastSeq);
 
-            if (cmd == OrderCommandType.RESERVED_COMPRESSED.getCode()) {
+            if (false/*cmd == OrderCommandType.RESERVED_COMPRESSED.getCode()*/) {
 
                 if (insideCompressedBlock) {
                     throw new IllegalStateException("Recursive compression block (data corrupted)");
@@ -714,6 +714,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             }
         }
 
+        // Now we have a non-existing fileName -> safe to create
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
