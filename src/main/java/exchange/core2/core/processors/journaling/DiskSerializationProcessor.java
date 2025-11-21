@@ -461,7 +461,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
             if (debug) log.debug("COMPR STEP lastSeq={} ", lastSeq);
 
-            if (cmd == OrderCommandType.RESERVED_COMPRESSED.getCode()) {
+            if (false/*cmd == OrderCommandType.RESERVED_COMPRESSED.getCode()*/) {
 
                 if (insideCompressedBlock) {
                     throw new IllegalStateException("Recursive compression block (data corrupted)");
