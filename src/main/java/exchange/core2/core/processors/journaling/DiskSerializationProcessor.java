@@ -250,7 +250,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             log.info("Enabled journaling at seq = {} ({}+{})", enableJournalAfterSeq + 1, baseSeq, dSeq);
         }
 
-        boolean debug = false;
+        boolean debug = true;
 
 //        log.debug("Writing {}", cmd);
 
@@ -454,7 +454,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
         while (jr.available() != 0) {
 
-            boolean debug = false;
+            boolean debug = true;
 //            boolean debug = insideCompressedBlock;
 
             final byte cmd = jr.readByte();
@@ -698,18 +698,24 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     }
 
     private void startNewFile(final long timestampNs) throws IOException {
-        filesCounter++;
+        // Close previous file if any
         if (channel != null) {
             channel.close();
             raf.close();
         }
-        final Path fileName = resolveJournalPath(filesCounter, baseSnapshotId);
-//        log.debug("Starting new journal file: {}", fileName);
 
-        if (Files.exists(fileName)) {
-            throw new IllegalStateException("File already exists: " + fileName);
+        Path fileName;
+
+        // Find the first free partition id for current baseSnapshotId
+        while (true) {
+            filesCounter++;
+            fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+            if (!Files.exists(fileName)) {
+                break;
+            }
         }
 
+        // Now we have a non-existing fileName -> safe to create
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
