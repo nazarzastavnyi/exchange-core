@@ -415,7 +415,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
 //        log.info("Read total: {} bytes ", totalBytesRead);
 
-        api.groupingControl(0, 0);
+        // api.groupingControl(0, 1);
 
 
         final MutableLong lastSeq = new MutableLong();
