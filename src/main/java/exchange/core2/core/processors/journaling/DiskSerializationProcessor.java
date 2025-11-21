@@ -698,6 +698,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     }
 
     private void startNewFile(final long timestampNs) throws IOException {
+
         // Close previous file if any
         if (channel != null) {
             channel.close();
@@ -706,20 +707,81 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
         Path fileName;
 
-        // Find the first free partition id for current baseSnapshotId
-        while (true) {
+        if (filesCounter == 0) {
+            // ----------------------------------------------------------
+            // CASE 1: First call in this process (startup after restart)
+            // ----------------------------------------------------------
+            // We must check if there are existing journal files for this snapshotId.
+
+            int lastExisting = 0;
+            while (true) {
+                Path candidate = resolveJournalPath(lastExisting + 1, baseSnapshotId);
+                if (Files.exists(candidate)) {
+                    lastExisting++;
+                } else {
+                    break;
+                }
+            }
+
+            if (lastExisting == 0) {
+                // No journal files exist yet → create the first file
+                filesCounter = 1;
+                fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+
+                raf = new RandomAccessFile(fileName.toString(), "rwd");
+                channel = raf.getChannel();
+                // position is already at start of file
+
+            } else {
+                // At least one journal file already exists
+                fileName = resolveJournalPath(lastExisting, baseSnapshotId);
+                long size = Files.size(fileName);
+
+                if (size < journalFileMaxSize) {
+                    // The last file is not full → append to it
+                    filesCounter = lastExisting;
+                    raf = new RandomAccessFile(fileName.toString(), "rwd");
+                    channel = raf.getChannel();
+                    channel.position(channel.size());  // APPEND to end of existing file
+
+                    log.info("Reusing existing journal file {} in append mode (size={} < limit={})",
+                            fileName, size, journalFileMaxSize);
+
+                } else {
+                    // The last file is full → create the next one
+                    filesCounter = lastExisting + 1;
+                    fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+
+                    raf = new RandomAccessFile(fileName.toString(), "rwd");
+                    channel = raf.getChannel();
+
+                    log.info("Last journal file {} is full (size={} >= limit={}), creating new {}",
+                            resolveJournalPath(lastExisting, baseSnapshotId),
+                            size,
+                            journalFileMaxSize,
+                            fileName);
+                }
+            }
+
+        } else {
+            // ----------------------------------------------------------
+            // CASE 2: Rotation inside the running process
+            // ----------------------------------------------------------
+            // If this is not the startup call, journaling wants a NEW file:
+            // - because of forced rotation
+            // - or because the previous file exceeded max size
+
             filesCounter++;
             fileName = resolveJournalPath(filesCounter, baseSnapshotId);
-            if (!Files.exists(fileName)) {
-                break;
-            }
+
+            raf = new RandomAccessFile(fileName.toString(), "rwd");
+            channel = raf.getChannel();
+
+            log.info("Starting new journal file {}", fileName);
         }
 
-        // Now we have a non-existing fileName -> safe to create
-        raf = new RandomAccessFile(fileName.toString(), "rwd");
-        channel = raf.getChannel();
-
-        registerNextJournal(baseSnapshotId, timestampNs); // TODO fix time
+        // Register new journal segment
+        registerNextJournal(baseSnapshotId, timestampNs);
     }
 
     /**
