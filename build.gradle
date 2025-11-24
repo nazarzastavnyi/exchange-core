@@ -26,9 +26,9 @@ dependencies {
     implementation "org.lz4:lz4-java:1.8.0"
 
     // Chronicle
-    implementation "net.openhft:chronicle-core:2.17.10"
-    implementation "net.openhft:chronicle-bytes:2.17.10"
-    implementation "net.openhft:chronicle-wire:2.17.10"
+    implementation "net.openhft:chronicle-core:2.20.122"
+    implementation "net.openhft:chronicle-bytes:2.20.106"
+    implementation "net.openhft:chronicle-wire:2.20.111"
 
     implementation "org.eclipse.collections:eclipse-collections:10.4.0"
     implementation "org.agrona:agrona:1.13.0"
