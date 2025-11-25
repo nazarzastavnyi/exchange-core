@@ -133,6 +133,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
                              SerializedModuleType type,
                              int instanceId,
                              WriteBytesMarshallable obj) {
+        snapshotId = allocateFreeInstance(snapshotId, type);
 
         final Path path = resolveSnapshotPath(snapshotId, type, instanceId);
 
@@ -780,5 +781,17 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
     private Path resolveJournalPath(int partitionId, long snapshotId) {
         return folder.resolve(String.format("%s_journal_%d_%04X.ecj", exchangeId, snapshotId, partitionId));
+    }
+
+    private int allocateFreeInstance(long snapshotId, SerializedModuleType type) {
+        int inst = 0;
+
+        while (true) {
+            Path p = resolveSnapshotPath(snapshotId, type, inst);
+            if (!Files.exists(p)) {
+                return inst;
+            }
+            inst++;
+        }
     }
 }
