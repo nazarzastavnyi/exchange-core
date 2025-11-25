@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.dashdevs.exchange"
-version = "0.5.7-1"
+version = "0.5.8-1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
