@@ -370,8 +370,8 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             registerNextSnapshot(cmd.orderId, baseSeq + dSeq, cmd.timestamp);
 
             // start new file
-            baseSnapshotId = cmd.orderId;
-            filesCounter = 0;
+            // baseSnapshotId = cmd.orderId;
+            // filesCounter = 0;
 
             flushBufferSync(true, cmd.timestamp);
 
@@ -632,7 +632,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
                 } if (cmdType == OrderCommandType.PERSIST_STATE_MATCHING|| cmdType == OrderCommandType.PERSIST_STATE_RISK) { 
 
                     if (debug) log.debug("ignored snapshot command during replay seq={} type={}", lastSeq, cmdType);
-                    
+
                 } else {
 
                     log.debug("eventsGroup={} serviceFlags={} cmdType={}", eventsGroup, serviceFlags, cmdType);
