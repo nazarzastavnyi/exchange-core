@@ -719,24 +719,18 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     }
 
     private void startNewFile(final long timestampNs) throws IOException {
-        // Close previous file if any
+        filesCounter++;
         if (channel != null) {
             channel.close();
             raf.close();
         }
+        final Path fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+//        log.debug("Starting new journal file: {}", fileName);
 
-        Path fileName;
-
-        // Find the first free partition id for current baseSnapshotId
-        while (true) {
-            filesCounter++;
-            fileName = resolveJournalPath(filesCounter, baseSnapshotId);
-            if (!Files.exists(fileName)) {
-                break;
-            }
+        if (Files.exists(fileName)) {
+            throw new IllegalStateException("File already exists: " + fileName);
         }
 
-        // Now we have a non-existing fileName -> safe to create
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
