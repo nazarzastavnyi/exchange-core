@@ -625,6 +625,16 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
                     api.binaryData(serviceFlags, eventsGroup, timestampNs, lastFlag, word0, word1, word2, word3, word4);
 
+                } else if (cmdType == OrderCommandType.PERSIST_STATE_MATCHING || cmdType == OrderCommandType.PERSIST_STATE_RISK) {
+
+                    // Snapshot / persist-state marker in journal.
+                    // No extra payload is written, so nothing to read or apply.
+                    // We just skip it on replay.
+
+                    if (debug) {
+                        log.debug("snapshot marker seq={} t={} cmdType={}", lastSeq, timestampNs, cmdType);
+                    }
+    
                 } else if (cmdType == OrderCommandType.RESET) {
 
                     api.reset(timestampNs);
