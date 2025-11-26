@@ -259,7 +259,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             log.info("Enabled journaling at seq = {} ({}+{})", enableJournalAfterSeq + 1, baseSeq, dSeq);
         }
 
-        boolean debug = false;
+        boolean debug = true;
 
 //        log.debug("Writing {}", cmd);
 
@@ -726,8 +726,8 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             channel.close();
             raf.close();
         }
-        final Path fileName = resolveJournalPath(filesCounter, JOURNAL_BASE_ID);
-//        log.debug("Starting new journal file: {}", fileName);
+        final Path fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+    //    log.debug("Starting new journal file: {}", fileName);
 
         if (Files.exists(fileName)) {
             throw new IllegalStateException("File already exists: " + fileName);
@@ -736,8 +736,9 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
-        registerNextJournal(JOURNAL_BASE_ID, timestampNs); // TODO fix time
+        registerNextJournal(baseSnapshotId, timestampNs); // TODO fix time
     }
+
 
     /**
      * call only from journal thread
