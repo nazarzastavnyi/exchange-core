@@ -88,6 +88,8 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
     private static final int MAX_COMMAND_SIZE_BYTES = 256;
 
+    private static final long JOURNAL_BASE_ID = 0L;
+
     // 🔧 NEW: flag to indicate journal replay is in progress
     private volatile boolean replayMode = false;
 
@@ -724,7 +726,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             channel.close();
             raf.close();
         }
-        final Path fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+        final Path fileName = resolveJournalPath(filesCounter, JOURNAL_BASE_ID);
 //        log.debug("Starting new journal file: {}", fileName);
 
         if (Files.exists(fileName)) {
@@ -734,7 +736,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
-        registerNextJournal(baseSnapshotId, timestampNs); // TODO fix time
+        registerNextJournal(JOURNAL_BASE_ID, timestampNs); // TODO fix time
     }
 
     /**
