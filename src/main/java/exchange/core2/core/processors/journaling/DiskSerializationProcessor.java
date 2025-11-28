@@ -735,7 +735,6 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
             }
         }
 
-        // Now we have a non-existing fileName -> safe to create
         raf = new RandomAccessFile(fileName.toString(), "rwd");
         channel = raf.getChannel();
 
