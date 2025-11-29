@@ -4,7 +4,7 @@
 
     <groupId>exchange.core2</groupId>
     <artifactId>exchange-core</artifactId>
-    <version>0.5.4-SNAPSHOT-2</version>
+    <version>0.5.4-SNAPSHOT-3</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
