@@ -406,7 +406,6 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     public long replayJournalFull(InitialStateConfiguration initialCfg, ExchangeApi api) {
         if (initialCfg.getJournalTimestampNs() == 0) {
             log.debug("No need to replay journal, returning baseSeq={}", baseSeq);
-
             return baseSeq;
         }
         log.debug("Replaying journal...");
@@ -635,7 +634,6 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     @Override
     public void replayJournalFullAndThenEnableJouraling(InitialStateConfiguration initialStateConfiguration, ExchangeApi exchangeApi) {
         long seq = replayJournalFull(initialStateConfiguration, exchangeApi);
-        // After replay is done, we enable journaling starting from that seq
         enableJournaling(seq, exchangeApi);
     }
 
