@@ -239,7 +239,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     // single threaded
     @Override
     public void writeToJournal(OrderCommand cmd, long dSeq, boolean eob) throws IOException {
-        
+
         // TODO improve checks logic
         // skip
         if (enableJournalAfterSeq == -1 || dSeq + baseSeq <= enableJournalAfterSeq) {
@@ -407,6 +407,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     public long replayJournalFull(InitialStateConfiguration initialCfg, ExchangeApi api) {
         if (initialCfg.getJournalTimestampNs() == 0) {
             log.debug("No need to replay journal, returning baseSeq={}", baseSeq);
+
             return baseSeq;
         }
         log.debug("Replaying journal...");
