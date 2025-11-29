@@ -87,6 +87,9 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
     private static final int MAX_COMMAND_SIZE_BYTES = 256;
 
+    // 🔧 NEW: flag to indicate journal replay is in progress
+    private volatile boolean replayMode = false;
+
 //    private List<Integer> batchSizes = new ArrayList<>(100000);
 //    final SingleWriterRecorder hdrRecorderRaw = new SingleWriterRecorder(Integer.MAX_VALUE, 2);
 //    final SingleWriterRecorder hdrRecorderLz4 = new SingleWriterRecorder(Integer.MAX_VALUE, 2);
@@ -240,8 +243,12 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     @Override
     public void writeToJournal(OrderCommand cmd, long dSeq, boolean eob) throws IOException {
 
-        // TODO improve checks logic
-        // skip
+        // 🔧 If we are replaying journal, do NOT write anything to journal.
+        // We still want engine + events, but no new .ecj data.
+        if (replayMode) {
+            return;
+        }
+        
         if (enableJournalAfterSeq == -1 || dSeq + baseSeq <= enableJournalAfterSeq) {
             return;
         }
@@ -415,6 +422,7 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 //        log.info("Read total: {} bytes ", totalBytesRead);
 
         api.groupingControl(0, 0);
+
 
 
         final MutableLong lastSeq = new MutableLong();
@@ -634,8 +642,15 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
     @Override
     public void replayJournalFullAndThenEnableJouraling(InitialStateConfiguration initialStateConfiguration, ExchangeApi exchangeApi) {
-        long seq = replayJournalFull(initialStateConfiguration, exchangeApi);
-        enableJournaling(seq, exchangeApi);
+        replayMode = true;
+        try {
+            long seq = replayJournalFull(initialStateConfiguration, exchangeApi);
+            // After replay is done, we enable journaling starting from that seq
+            enableJournaling(seq, exchangeApi);
+        } finally {
+            // Whatever happens, leave replay mode
+            replayMode = false;
+        }
     }
 
     @Override
@@ -655,6 +670,12 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 //            log.debug("Journal average batchSize = {} bytes", batchSizes.stream().mapToInt(c -> c).average());
 //            batchSizes = new ArrayList<>();
 //        }
+        // If no journal file is currently open, there is nothing to flush.
+        if (channel == null) {
+            journalWriteBuffer.clear();
+            lz4WriteBuffer.clear();
+            return;
+        }
 
         if (journalWriteBuffer.position() < journalBatchCompressThreshold) {
             // uncompressed write for single messages or small batches
@@ -697,16 +718,21 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
     }
 
     private void startNewFile(final long timestampNs) throws IOException {
-        filesCounter++;
+        // Close previous file if any
         if (channel != null) {
             channel.close();
             raf.close();
         }
-        final Path fileName = resolveJournalPath(filesCounter, baseSnapshotId);
-//        log.debug("Starting new journal file: {}", fileName);
 
-        if (Files.exists(fileName)) {
-            throw new IllegalStateException("File already exists: " + fileName);
+        Path fileName;
+
+        // Find the first free partition id for current baseSnapshotId
+        while (true) {
+            filesCounter++;
+            fileName = resolveJournalPath(filesCounter, baseSnapshotId);
+            if (!Files.exists(fileName)) {
+                break;
+            }
         }
 
         raf = new RandomAccessFile(fileName.toString(), "rwd");
