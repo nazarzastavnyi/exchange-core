@@ -20,6 +20,6 @@ jobs:
           java-version: "8"
           cache: maven
 
-      - run: mvn -B clean deploy -P github-dashdevs
+      - run: mvn -B clean deploy -P github-nazarzastavnyi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
