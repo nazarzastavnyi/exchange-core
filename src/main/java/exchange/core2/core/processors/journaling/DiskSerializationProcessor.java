@@ -620,6 +620,12 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 
                     api.reset(timestampNs);
 
+                } else if (cmdType == OrderCommandType.PERSIST_STATE_RISK || cmdType == OrderCommandType.PERSIST_STATE_MATCHING) {
+
+                    if (debug) {
+                        log.debug("skip PERSIST_STATE during replay seq={} t={}", lastSeq.value, timestampNs);
+                    }
+                    
                 } else {
 
                     log.debug("eventsGroup={} serviceFlags={} cmdType={}", eventsGroup, serviceFlags, cmdType);
