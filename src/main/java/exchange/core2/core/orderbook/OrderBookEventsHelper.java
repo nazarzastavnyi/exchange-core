@@ -179,7 +179,9 @@ public final class OrderBookEventsHelper {
             result.put(section, wire);
         });
 
-
+        // Have to set OrderCommand matcherEvent=NULL after finish consume its data so GC can free the memory
+        // This will fix memory leak (OutOfMemory) for ReportQuery with long response data, eg: GetOrderListQuery
+        cmd.matcherEvent = null;
         return result;
     }
 
