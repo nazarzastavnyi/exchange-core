@@ -655,12 +655,6 @@ public final class DiskSerializationProcessor implements ISerializationProcessor
 //            log.debug("Journal average batchSize = {} bytes", batchSizes.stream().mapToInt(c -> c).average());
 //            batchSizes = new ArrayList<>();
 //        }
-        // If no journal file is currently open, there is nothing to flush.
-        if (channel == null) {
-            journalWriteBuffer.clear();
-            lz4WriteBuffer.clear();
-            return;
-        }
 
         if (journalWriteBuffer.position() < journalBatchCompressThreshold) {
             // uncompressed write for single messages or small batches
