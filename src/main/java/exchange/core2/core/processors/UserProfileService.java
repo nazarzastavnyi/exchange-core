@@ -86,20 +86,11 @@ public final class UserProfileService implements WriteBytesMarshallable, StateHa
 //            return CommandResultCode.USER_MGMT_ACCOUNT_BALANCE_ADJUSTMENT_ZERO;
 //        }
 
-        // double settlement protection
-        if (userProfile.adjustmentsCounter == fundingTransactionId) {
-            return CommandResultCode.USER_MGMT_ACCOUNT_BALANCE_ADJUSTMENT_ALREADY_APPLIED_SAME;
-        }
-        if (userProfile.adjustmentsCounter > fundingTransactionId) {
-            return CommandResultCode.USER_MGMT_ACCOUNT_BALANCE_ADJUSTMENT_ALREADY_APPLIED_MANY;
-        }
-
         // validate balance for withdrawals
         if (amount < 0 && (userProfile.accounts.get(currency) + amount < 0)) {
             return CommandResultCode.USER_MGMT_ACCOUNT_BALANCE_ADJUSTMENT_NSF;
         }
 
-        userProfile.adjustmentsCounter = fundingTransactionId;
         userProfile.accounts.addToValue(currency, amount);
 
         //log.debug("FUND: {}", userProfile);

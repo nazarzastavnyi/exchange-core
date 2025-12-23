@@ -35,8 +35,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
     // TODO initialize lazily (only needed if margin trading allowed)
     public final IntObjectHashMap<SymbolPositionRecord> positions;
 
-    // protects from double adjustment
-    public long adjustmentsCounter;
 
     // currency accounts
     // currency -> balance
@@ -48,7 +46,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
         //log.debug("New {}", uid);
         this.uid = uid;
         this.positions = new IntObjectHashMap<>();
-        this.adjustmentsCounter = 0L;
         this.accounts = new IntLongHashMap();
         this.userStatus = userStatus;
     }
@@ -60,8 +57,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
         // positions
         this.positions = SerializationUtils.readIntHashMap(bytesIn, b -> new SymbolPositionRecord(uid, b));
 
-        // adjustmentsCounter
-        this.adjustmentsCounter = bytesIn.readLong();
 
         // account balances
         this.accounts = SerializationUtils.readIntLongHashMap(bytesIn);
@@ -86,9 +81,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
         // positions
         SerializationUtils.marshallIntHashMap(positions, bytes);
 
-        // adjustmentsCounter
-        bytes.writeLong(adjustmentsCounter);
-
         // account balances
         SerializationUtils.marshallIntLongHashMap(accounts, bytes);
 
@@ -103,7 +95,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
                 "uid=" + uid +
                 ", positions=" + positions.size() +
                 ", accounts=" + accounts +
-                ", adjustmentsCounter=" + adjustmentsCounter +
                 ", userStatus=" + userStatus +
                 '}';
     }
@@ -113,7 +104,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
         return Objects.hash(
                 uid,
                 HashingUtils.stateHash(positions),
-                adjustmentsCounter,
                 accounts.hashCode(),
                 userStatus.hashCode());
     }
