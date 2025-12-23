@@ -81,9 +81,6 @@ public final class UserProfile implements WriteBytesMarshallable, StateHash {
         // positions
         SerializationUtils.marshallIntHashMap(positions, bytes);
 
-        // adjustmentsCounter
-        bytes.writeLong(adjustmentsCounter);
-
         // account balances
         SerializationUtils.marshallIntLongHashMap(accounts, bytes);
 
