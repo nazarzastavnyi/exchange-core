@@ -17,7 +17,7 @@ public final class ResultsHandler implements EventHandler<OrderCommand> {
     public void onEvent(OrderCommand cmd, long sequence, boolean endOfBatch) {
 
         if (cmd.command == OrderCommandType.GROUPING_CONTROL) {
-            SimpleEventsProcessor.setReplay(cmd.orderId == 1);
+            SimpleEventsProcessor.setReplay(cmd.orderId != 1);
         }
 
         resultsConsumer.accept(cmd, sequence);
