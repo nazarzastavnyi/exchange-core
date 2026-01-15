@@ -467,16 +467,16 @@
         </profile>
 
         <profile>
-            <id>github-dashdevs</id>
+            <id>github-nazarzastavnyi</id>
             <distributionManagement>
                 <snapshotRepository>
                     <id>github</id>
-                    <url>https://maven.pkg.github.com/dashdevs/exchange-core</url>
+                    <url>https://maven.pkg.github.com/nazarzastavnyi/exchange-core</url>
                 </snapshotRepository>
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/dashdevs/exchange-core</url>
+                    <url>https://maven.pkg.github.com/nazarzastavnyi/exchange-core</url>
                 </repository>
             </distributionManagement>
             <build>

@@ -6,6 +6,7 @@ import exchange.core2.core.common.MatcherTradeEvent;
 import exchange.core2.core.common.api.*;
 import exchange.core2.core.common.cmd.CommandResultCode;
 import exchange.core2.core.common.cmd.OrderCommand;
+import exchange.core2.core.common.cmd.OrderCommandType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.function.ObjLongConsumer;
 public class SimpleEventsProcessor implements ObjLongConsumer<OrderCommand> {
 
     private final IEventsHandler eventsHandler;
+    private static volatile boolean isReplay = false;
 
     @Override
     public void accept(OrderCommand cmd, long seq) {
@@ -33,6 +35,10 @@ public class SimpleEventsProcessor implements ObjLongConsumer<OrderCommand> {
         } catch (Exception ex) {
             log.error("Exception when handling command result data", ex);
         }
+    }
+
+    public static void setReplay(boolean value) {
+        isReplay = value;
     }
 
     private void sendTradeEvents(OrderCommand cmd) {
@@ -197,7 +203,7 @@ public class SimpleEventsProcessor implements ObjLongConsumer<OrderCommand> {
 
     private void sendApiCommandResult(ApiCommand cmd, CommandResultCode resultCode, long timestamp, long seq) {
         cmd.timestamp = timestamp;
-        final IEventsHandler.ApiCommandResult commandResult = new IEventsHandler.ApiCommandResult(cmd, resultCode, seq);
+        final IEventsHandler.ApiCommandResult commandResult = new IEventsHandler.ApiCommandResult(cmd, resultCode, seq, isReplay);
         eventsHandler.commandResult(commandResult);
     }
 }
