@@ -3,6 +3,7 @@ package exchange.core2.core.processors;
 import com.lmax.disruptor.EventHandler;
 import exchange.core2.core.common.cmd.OrderCommand;
 import exchange.core2.core.common.cmd.OrderCommandType;
+import exchange.core2.core.SimpleEventsProcessor;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.ObjLongConsumer;
@@ -12,11 +13,13 @@ public final class ResultsHandler implements EventHandler<OrderCommand> {
 
     private final ObjLongConsumer<OrderCommand> resultsConsumer;
 
-    private boolean processingEnabled = true;
-
     @Override
     public void onEvent(OrderCommand cmd, long sequence, boolean endOfBatch) {
 
-            resultsConsumer.accept(cmd, sequence);
+        if (cmd.command == OrderCommandType.GROUPING_CONTROL) {
+            SimpleEventsProcessor.setReplay(cmd.orderId != 1);
+        }
+
+        resultsConsumer.accept(cmd, sequence);
     }
 }

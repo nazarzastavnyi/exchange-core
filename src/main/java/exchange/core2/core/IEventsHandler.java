@@ -62,6 +62,7 @@ public interface IEventsHandler {
         public final ApiCommand command;
         public final CommandResultCode resultCode;
         public final long seq;
+        public final boolean isReply;
     }
 
     @Data
