@@ -23,9 +23,7 @@ public final class ResultsHandler implements EventHandler<OrderCommand> {
             SimpleEventsProcessor.setProcessingEnabled(processingEnabled);
         }
 
-        if (processingEnabled) {
-            resultsConsumer.accept(cmd, sequence);
-        }
+        resultsConsumer.accept(cmd, sequence);
 
     }
 }
