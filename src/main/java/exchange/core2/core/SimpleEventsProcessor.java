@@ -23,7 +23,7 @@ import java.util.function.ObjLongConsumer;
 public class SimpleEventsProcessor implements ObjLongConsumer<OrderCommand> {
 
     private final IEventsHandler eventsHandler;
-    private static volatile boolean processingEnabled = true;
+    private boolean processingEnabled = true;
 
     @Override
     public void accept(OrderCommand cmd, long seq) {
@@ -38,7 +38,7 @@ public class SimpleEventsProcessor implements ObjLongConsumer<OrderCommand> {
         }
     }
 
-    public static void setProcessingEnabled(boolean value) {
+    public void setProcessingEnabled(boolean value) {
         processingEnabled = value;
     }
 

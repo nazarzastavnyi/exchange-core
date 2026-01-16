@@ -20,7 +20,10 @@ public final class ResultsHandler implements EventHandler<OrderCommand> {
 
         if (cmd.command == OrderCommandType.GROUPING_CONTROL) {
             processingEnabled = cmd.orderId == 1;
-            SimpleEventsProcessor.setProcessingEnabled(processingEnabled);
+        }
+
+        if (resultsConsumer instanceof SimpleEventsProcessor) {
+                ((SimpleEventsProcessor) resultsConsumer).setProcessingEnabled(processingEnabled);
         }
 
         resultsConsumer.accept(cmd, sequence);
