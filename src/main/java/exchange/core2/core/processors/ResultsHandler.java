@@ -13,13 +13,19 @@ public final class ResultsHandler implements EventHandler<OrderCommand> {
 
     private final ObjLongConsumer<OrderCommand> resultsConsumer;
 
+    private boolean processingEnabled = true;
+
     @Override
     public void onEvent(OrderCommand cmd, long sequence, boolean endOfBatch) {
 
         if (cmd.command == OrderCommandType.GROUPING_CONTROL) {
-            SimpleEventsProcessor.setReplay(cmd.orderId != 1);
+            processingEnabled = cmd.orderId == 1;
+            SimpleEventsProcessor.setProcessingEnabled(processingEnabled);
         }
 
-        resultsConsumer.accept(cmd, sequence);
+        if (processingEnabled) {
+            resultsConsumer.accept(cmd, sequence);
+        }
+
     }
 }
